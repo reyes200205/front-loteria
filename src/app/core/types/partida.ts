@@ -110,4 +110,10 @@ export interface colocarFichaRequest {
   posicion: number
 }
 
+export interface ValidarCartaResponse {
+  ganador: boolean
+  message: string
+}
+
+
 

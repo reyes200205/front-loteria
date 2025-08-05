@@ -17,6 +17,7 @@ import {
   cartaResponse,
   colocarFichaResponse,
   colocarFichaRequest,
+  ValidarCartaResponse
 } from '../../core/types/partida';
 
 @Injectable({
@@ -161,6 +162,21 @@ export class PartidaService {
       .pipe(
         catchError((error) => {
           console.error('Error al colocar ficha:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  validarCarta(partidaId: number): Observable<ValidarCartaResponse> {
+    if (!partidaId || isNaN(partidaId)) {
+      return throwError(() => new Error('ID de partida inválido'));
+    }
+
+    return this.http
+      .get<ValidarCartaResponse>(`${this.apiUrl}/juego/${partidaId}/validar-carta`,)
+      .pipe(
+        catchError((error) => {
+          console.error('Error al validar carta:', error);
           return throwError(() => error);
         })
       );
