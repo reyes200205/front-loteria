@@ -3,10 +3,11 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
 import { PartidaService } from '../../core/services/partida.service';
 import { CommonModule } from '@angular/common';
+import { CartaComponent } from '../components/carta/carta.component';
 
 @Component({
   selector: 'app-anfitrion',
-  imports: [CommonModule],
+  imports: [CommonModule, CartaComponent],
   templateUrl: './anfitrion.component.html',
   styleUrl: './anfitrion.component.css',
 })
@@ -36,7 +37,7 @@ export class AnfitrionComponent implements OnInit, OnDestroy {
     this.partidaId = +id;
     this.cargarPartida();
 
-    this.pollingSubscription = interval(3000).subscribe(() => {
+    this.pollingSubscription = interval(5000).subscribe(() => {
       this.cargarPartida(false);
     });
   }
@@ -52,7 +53,15 @@ export class AnfitrionComponent implements OnInit, OnDestroy {
 
     this.partidaService.obtenerJuegoAnfitrion(this.partidaId).subscribe({
       next: (response) => {
-        this.partida = response.partida;
+        this.partida = {
+          ...response.partida,
+          usuarios: response.partida.usuarios?.map((usuario: any) => ({
+            ...usuario,
+            cartas: this.parseJSONSafely(usuario.cartas, []),
+            fichas: this.parseJSONSafely(usuario.fichas, [])
+          })) || []
+        };
+        
         this.cartasGritadas = response.partida.cartasGritadas || [];
         this.cartaActual = response.partida.cartaActual ?? 0;
 
@@ -67,8 +76,25 @@ export class AnfitrionComponent implements OnInit, OnDestroy {
     });
   }
 
+  private parseJSONSafely(jsonString: any, defaultValue: any = null): any {
+    if (!jsonString) return defaultValue;
+    
+    if (typeof jsonString === 'object') return jsonString;
+    
+    if (typeof jsonString === 'string') {
+      try {
+        return JSON.parse(jsonString);
+      } catch (error) {
+        console.warn('Error parsing JSON:', jsonString, error);
+        return defaultValue;
+      }
+    }
+    
+    return defaultValue;
+  }
+
   generarMazoRestante(): number[] {
-    const todasCartas = Array.from({ length: 52 }, (_, i) => i + 1);
+    const todasCartas = Array.from({ length: 54 }, (_, i) => i + 1);
     return todasCartas.filter(carta => !this.cartasGritadas.includes(carta));
   }
 
@@ -83,6 +109,7 @@ export class AnfitrionComponent implements OnInit, OnDestroy {
     this.partidaService.gritarCarta(this.partidaId).subscribe({
       next: (response) => {
         this.cartasGritadas.push(response.carta);
+        this.cartaActual = response.carta;
         this.mazoRestante = this.generarMazoRestante();
       },
       error: (error) => {
@@ -92,7 +119,11 @@ export class AnfitrionComponent implements OnInit, OnDestroy {
   }
 
   onImageError(event: any) {
-  console.log('Error cargando imagen para carta:', this.cartaActual);
-  event.target.src = '/cartas/default.png';
-}
+    console.log('Error cargando imagen para carta:', this.cartaActual);
+    event.target.src = '/cartas/default.png';
+  }
+
+  trackByUsuarioId(index: number, usuario: any): any {
+    return usuario.id || index;
+  }
 }

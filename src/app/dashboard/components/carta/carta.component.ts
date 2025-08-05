@@ -10,9 +10,9 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 export class CartaComponent {
   @Input() numeros: number[] = [];
   @Input() fichas: number[] = [];
-  @Input() modoSoloLectura = false; // Para el anfitrión que solo observa
+  @Input() modoSoloLectura = false; 
 
-  @Output() fichaColocada = new EventEmitter<number>(); // Índice de la posición clickeada
+  @Output() fichaColocada = new EventEmitter<number>(); 
 
   onclick(posición: number): void {
     if (this.modoSoloLectura) return;
@@ -25,6 +25,6 @@ export class CartaComponent {
   }
 
   obtenerRuta(id: number): string {
-    return `/cartas/${id}.jpg`; // Cambiar .png por .jpg
+    return `/cartas/${id}.jpg`;
   }
 }
