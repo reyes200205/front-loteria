@@ -1,0 +1,35 @@
+<div *ngIf="isLoading">Cargando partida...</div>
+<div *ngIf="errorMsg">{{ errorMsg }}</div>
+
+<div *ngIf="partida && !isLoading">
+  <h2>Partida: {{ partida.nombre }}</h2>
+  <p>Estado: {{ partida.estado }}</p>
+
+  <button
+    class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 transform hover:scale-105"
+    (click)="sacarCarta()"
+    [disabled]="(mazoRestante || []).length === 0"
+  >
+    Sacar Carta (Quedan {{ (mazoRestante || []).length }})
+  </button>
+
+  <div *ngIf="cartaActual" class="my-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-4 text-center">
+      Última carta sacada:
+    </h3>
+    <div class="flex flex-col items-center space-y-4">
+      <div class="relative">
+        <img
+          [src]="'/cartas/' + cartaActual + '.jpg'"
+          [alt]="'Carta ' + cartaActual"
+          class="w-48 h-72 object-cover rounded-xl shadow-2xl border-4 border-white transform hover:scale-105 transition-transform duration-300"
+          (error)="onImageError($event)"
+        />
+      </div>
+      <div class="bg-gray-100 px-4 py-2 rounded-full">
+        <p class="text-lg font-semibold text-gray-700">
+          Carta #{{ cartaActual }}
+        </p>
+      </div>
+    </div>
+</div>
