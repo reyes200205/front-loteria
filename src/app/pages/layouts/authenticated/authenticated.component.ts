@@ -46,7 +46,7 @@ export class authenticatedComponent implements OnInit, OnDestroy {
 
 
   goToPartidas() {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/app/mis-partidas']);
     if (!this.isDesktop()) {
       this.isSidebarOpen = false;
     }

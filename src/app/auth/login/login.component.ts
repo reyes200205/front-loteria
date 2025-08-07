@@ -4,18 +4,19 @@ import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ErrorTranslator } from '../../shared/utils/error-translator';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, CommonModule, RouterModule], 
+  imports: [ReactiveFormsModule, CommonModule, RouterModule],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrl: './login.component.css',
 })
 export class LoginComponent {
   loginForm: FormGroup;
   loading = false;
   error: string = '';
-  fieldErrors: { [key: string]: string } = {}; 
+  fieldErrors: { [key: string]: string } = {};
 
   constructor(
     private fb: FormBuilder,
@@ -23,8 +24,8 @@ export class LoginComponent {
     private router: Router
   ) {
     this.loginForm = this.fb.group({
-      email: [''],
-      password: ['']
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
@@ -32,18 +33,29 @@ export class LoginComponent {
     if (this.loginForm.valid) {
       this.loading = true;
       this.error = '';
-      this.fieldErrors = {}; 
+      this.fieldErrors = {};
 
       this.authService.login(this.loginForm.value).subscribe({
         next: () => {
-          this.loading = false; 
+          this.loading = false;
           this.router.navigate(['app/home']);
         },
         error: (err) => {
           this.loading = false;
-        }
+
+          if (err.errors && err.errors.length > 0) {
+            err.errors.forEach((error: { field: string; message: string }) => {
+              const translateMessage = ErrorTranslator.translateError(
+                error.message
+              );
+              this.fieldErrors[error.field] = translateMessage;
+            });
+          } else {
+            this.error = err.message || 'Error logging in';
+          }
+        },
       });
-    }   
+    }
   }
 
   getFieldError(fieldName: string): string | null {

@@ -17,7 +17,10 @@ import {
   cartaResponse,
   colocarFichaResponse,
   colocarFichaRequest,
-  ValidarCartaResponse
+  ValidarCartaResponse,
+  ObtenerPartidasResponse,
+  ultimosDatosResponse,
+  salirPartidaResponse
 } from '../../core/types/partida';
 
 @Injectable({
@@ -152,6 +155,21 @@ export class PartidaService {
       );
   }
 
+  obtenerUltimosDatos(partidaId: number): Observable<ultimosDatosResponse> {
+    if (!partidaId || isNaN(partidaId)) {
+      return throwError(() => new Error('ID de partida inválido'));
+    }
+
+    return this.http
+      .get<ultimosDatosResponse>(`${this.apiUrl}/juego/${partidaId}/ganador`)
+      .pipe(
+        catchError((error) => {
+          console.error('Error al obtener ultimos datos:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
   colocarFicha(partidaId: number, posicion: number): Observable<colocarFichaResponse> {
     if (!partidaId || isNaN(partidaId)) {
       return throwError(() => new Error('ID de partida inválido'));
@@ -162,6 +180,32 @@ export class PartidaService {
       .pipe(
         catchError((error) => {
           console.error('Error al colocar ficha:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  obtenerMisPartidas(): Observable<ObtenerPartidasResponse> {
+    return this.http
+      .get<ObtenerPartidasResponse>(`${this.apiUrl}/partidas/user`)
+      .pipe(
+        catchError((error) => {
+          console.error('Error al obtener mis partidas:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  salirPartida(partidaId: number): Observable<salirPartidaResponse> {
+    if (!partidaId || isNaN(partidaId)) {
+      return throwError(() => new Error('ID de partida inválido'));
+    }
+
+    return this.http
+      .delete<salirPartidaResponse>(`${this.apiUrl}/partida/${partidaId}/salir`)
+      .pipe(
+        catchError((error) => {
+          console.error('Error al salir de la partida:', error);
           return throwError(() => error);
         })
       );

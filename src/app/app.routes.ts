@@ -11,6 +11,7 @@ import { AnfitrionComponent } from './dashboard/anfitrion/anfitrion.component';
 import { PartidasComponent } from './dashboard/partidas/partidas.component';
 import { SalaEsperaComponent } from './dashboard/sala-espera/sala-espera.component';
 import { JuegoUsuarioComponent } from './dashboard/juego-usuario/juego-usuario.component';
+import { MisPartidasComponent } from './dashboard/mis-partidas/mis-partidas.component';
 
 
 export const routes: Routes = [
@@ -63,6 +64,10 @@ export const routes: Routes = [
             {
                 path: 'juego/:id',
                 component: JuegoUsuarioComponent
+            },
+            {
+                path: 'mis-partidas',
+                component: MisPartidasComponent
             }
         ]
 

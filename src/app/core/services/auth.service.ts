@@ -167,26 +167,6 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
-  private handleError(error: HttpErrorResponse) {
-    let errorResponse: ApiErrorResponse = {
-      message: 'Ha ocurrido un error al procesar la petición',
-      errors: [],
-    };
-
-    if (error.error instanceof ErrorEvent) {
-      errorResponse.message = error.error.message;
-    } else {
-      if (error.error && typeof error.error === 'object') {
-        errorResponse = {
-          message: error.error.message || 'Error al procesar la petición',
-          errors: error.error.errors || [],
-        };
-      } else {
-        errorResponse.message = error.message;
-      }
-    }
-    return throwError(errorResponse);
-  }
 
   initAuthService() {
     const token = this.getToken();
@@ -211,5 +191,26 @@ export class AuthService {
           }
         },
       });
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    let errorResponse: ApiErrorResponse = {
+      message: 'Ha ocurrido un error al procesar la petición',
+      errors: [],
+    };
+
+    if (error.error instanceof ErrorEvent) {
+      errorResponse.message = error.error.message;
+    } else {
+      if (error.error && typeof error.error === 'object') {
+        errorResponse = {
+          message: error.error.message || 'Error al procesar la petición',
+          errors: error.error.errors || [],
+        };
+      } else {
+        errorResponse.message = error.message;
+      }
+    }
+    return throwError(errorResponse);
   }
 }

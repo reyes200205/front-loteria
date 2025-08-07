@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ReactiveFormsModule } from '@angular/forms';
+import { ErrorTranslator } from '../../shared/utils/error-translator';
 
 @Component({
   selector: 'app-register',
@@ -23,9 +24,9 @@ export class RegisterComponent {
     private router: Router
   ) {
     this.registerForm = this.fb.group({
-      fullName: [''],
-      email: [''],
-      password: ['']
+      fullName: ['', [Validators.required, Validators.minLength(3)]],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
@@ -35,13 +36,23 @@ export class RegisterComponent {
       this.error = '';
       this.fieldErrors = {};
 
-      console.log(this.registerForm.value);
       this.authService.register(this.registerForm.value).subscribe({
         next: () => {
           this.router.navigate(['/app/home']);
         },
         error: (err) => {
           this.loading = false;
+
+          if (err.errors && err.errors.length > 0) {
+            err.errors.forEach((error: { field: string; message: string }) => {
+              const translateMessage = ErrorTranslator.translateError(
+                error.message
+              );
+              this.fieldErrors[error.field] = translateMessage;
+            });
+          } else {
+            this.error = err.message || 'Error registering';
+          }
         }
       })
     }

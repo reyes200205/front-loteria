@@ -122,3 +122,23 @@ export interface ValidarCartaResponse {
   ganador: boolean;
   message: string;
 }
+
+
+export interface ObtenerPartidasResponse {
+  message: string
+  partidas: Partida[]
+}
+
+
+export interface ultimosDatosResponse {
+  success: boolean
+  yaHayGanador: boolean
+  ganadorId: number
+  tuEresElGanador: boolean
+  ultimaCarta: number
+}
+
+export interface salirPartidaResponse {
+  message: string
+}
+

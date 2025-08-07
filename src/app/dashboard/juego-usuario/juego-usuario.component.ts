@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PartidaService } from '../../core/services/partida.service';
 import { CommonModule } from '@angular/common';
 import { CartaComponent } from '../components/carta/carta.component';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-juego-usuario',
@@ -11,6 +12,11 @@ import { CartaComponent } from '../components/carta/carta.component';
   styleUrl: './juego-usuario.component.css',
 })
 export class JuegoUsuarioComponent implements OnInit {
+
+  pollingSubscription!: Subscription;
+  ultimaCarta!: number;
+
+
   partidaId!: number;
   carta: number[] = [];
   posicionesMarcadas: number[] = [];
@@ -28,7 +34,44 @@ export class JuegoUsuarioComponent implements OnInit {
     const partidaId = this.route.snapshot.params['id'];
     this.partidaId = +partidaId;
     this.cargarCarta();
+    this.iniciarPolling();
   }
+
+
+  iniciarPolling(): void {
+    this.pollingSubscription = interval(3000).subscribe(() => {
+      this.partidaService.obtenerUltimosDatos(this.partidaId).subscribe({
+        next: (response) => {
+          this.ultimaCarta = response.ultimaCarta;
+
+
+          if(response.yaHayGanador) {
+            this.esGanador = response.tuEresElGanador;
+            this.mensajeResultado = this.esGanador ? '¡Felicidades! ¡Has ganado!' : 'Te equivocaste en algunas posiciones!';
+
+            this.pollingSubscription.unsubscribe();
+
+            if(!this.esGanador){
+              setTimeout(() => {
+                alert(this.mensajeResultado)
+                this.router.navigate(['/app/home'])
+              }, 3000)
+            }
+          }
+        },
+        error: (error) => {
+          console.error('Error al obtener ultimos datos:', error);
+        },
+      })
+    })
+  }
+
+  ngOnDestroy(): void {
+    this.pollingSubscription.unsubscribe();
+  }
+
+
+
 
   cargarCarta(): void {
     this.partidaService.cargarCarta(this.partidaId, this.carta).subscribe({
@@ -80,7 +123,26 @@ export class JuegoUsuarioComponent implements OnInit {
     });
   }
 
+  abandonarPartida(): void {
+    this.partidaService.salirPartida(this.partidaId).subscribe({
+      next: (response) => {
+        this.router.navigate(['/app/home'])
+      },
+      error: (error) => {
+        console.error('Error al abandonar la partida:', error);
+      },
+    });
+  }
+
   estaMarcada(posicion: number): boolean {
     return this.posicionesMarcadas.includes(posicion);
+  }
+
+  get fichasRestantes(): number {
+    return this.maxFichas - this.posicionesMarcadas.length;
+  }
+
+  get ArregloFichasRestantes(): number[] {
+    return Array(this.fichasRestantes).fill(0)
   }
 }
